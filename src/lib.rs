@@ -3,14 +3,16 @@ use worker::*;
 #[derive(Deserialize)]
 struct ContentTypeCheckRequest {
     url: String,
-    require_types: Option<Vec<String>>, // priority
-    require_main_types: Option<Vec<String>>,
+    expected_types: Option<Vec<String>>, // priority
+    expected_main_types: Option<Vec<String>>,
 }
 
 #[derive(Serialize)]
 struct ContentTypeCheckResponse {
     is_ok: bool,
     content_type: String,
+    expected_types: Option<Vec<String>>,
+    expected_main_types: Option<Vec<String>>,
     // error_message: Option<String>,
 }
 
@@ -38,35 +40,47 @@ async fn main(mut req: Request, _env: Env, _ctx: Context) -> Result<Response> {
                 return Response::error(format!("Failed to get content type: {}", e), 500);
             }
         };
-        if let Some(types) = cr.require_types {
-            for t in types {
-                if content_type == t {
-                    return Response::from_json::<ContentTypeCheckResponse>(
-                        &ContentTypeCheckResponse {
-                            is_ok: true,
-                            content_type,
-                        },
-                    );
+        // check exact types first
+        if let Some(ref types) = cr.expected_types {
+            if !types.is_empty() {
+                for t in types {
+                    if &content_type == t {
+                        return Response::from_json::<ContentTypeCheckResponse>(
+                            &ContentTypeCheckResponse {
+                                is_ok: true,
+                                content_type,
+                                expected_types: cr.expected_types,
+                                expected_main_types: cr.expected_main_types,
+                            },
+                        );
+                    }
                 }
             }
-        } else if let Some(main_types) = cr.require_main_types {
-            let main_type = content_type.split('/').next().unwrap_or_default();
-            for t in main_types {
-                if main_type == t {
-                    return Response::from_json::<ContentTypeCheckResponse>(
-                        &ContentTypeCheckResponse {
-                            is_ok: true,
-                            content_type,
-                        },
-                    );
-                }
-            }
-        } else {
-            return Response::error("No content type requirements provided", 400);
         }
+        // check main types
+        if let Some(ref main_types) = cr.expected_main_types {
+            if !main_types.is_empty() {
+                let main_type = content_type.split('/').next().unwrap_or_default();
+                for t in main_types {
+                    if main_type == t {
+                        return Response::from_json::<ContentTypeCheckResponse>(
+                            &ContentTypeCheckResponse {
+                                is_ok: true,
+                                content_type,
+                                expected_types: cr.expected_types,
+                                expected_main_types: cr.expected_main_types,
+                            },
+                        );
+                    }
+                }
+            }
+        }
+
         Response::from_json::<ContentTypeCheckResponse>(&ContentTypeCheckResponse {
             is_ok: false,
             content_type,
+            expected_types: cr.expected_types,
+            expected_main_types: cr.expected_main_types,
         })
     } else {
         Response::error("Unsupported method.", 405)

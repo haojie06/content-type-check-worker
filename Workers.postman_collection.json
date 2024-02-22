@@ -1,0 +1,63 @@
+{
+	"info": {
+		"_postman_id": "f8ed6c01-ddb6-4eff-9b76-3ca9bbba84b7",
+		"name": "Workers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ContentTypeCheck expect type",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"url\": \"https://aoyouer.com/posts/cloudflare-workers-rust/2024-02-22-13-31-43_hub132bcac0b9b573b5cbcd591988d69d4_859512_1600x0_resize_box_3.png\",\n    \"expected_types\": [\"image/png\"],\n    \"expected_main_types\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://content-type-check-worker.aoyou.workers.dev",
+					"protocol": "https",
+					"host": [
+						"content-type-check-worker",
+						"aoyou",
+						"workers",
+						"dev"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ContentTypeCheck expect main type",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"url\": \"https://aoyouer.com/posts/cloudflare-workers-rust/2024-02-22-13-31-43_hub132bcac0b9b573b5cbcd591988d69d4_859512_1600x0_resize_box_3.png\",\n    \"expected_types\": [],\n    \"expected_main_types\": [\"image\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://content-type-check-worker.aoyou.workers.dev",
+					"protocol": "https",
+					"host": [
+						"content-type-check-worker",
+						"aoyou",
+						"workers",
+						"dev"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
